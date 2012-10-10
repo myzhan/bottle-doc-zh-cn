@@ -1,0 +1,74 @@
+=====================
+Bottle-Werkzeug
+=====================
+
+`Werkzeug <http://werkzeug.pocoo.org/>`_ 是一个强大的WSGI类库。它包含一个交互式的调试器和包装好
+的request和response对象。
+
+这个插件集成了 :class:`werkzeug.wrappers.Request` 和 :class:`werkzeug.wrappers.Response` 
+用于取代内置的相应实现，支持 :mod:`werkzeug.exceptions` ,用交互式的调试器替换了默认的错误页面。
+
+
+安装
+===============
+
+下面两个命令任选一个
+
+::
+
+    $ pip install bottle-werkzeug
+    $ easy_install bottle-werkzeug
+
+或从github上下载最新版本
+
+::
+
+    $ git clone git://github.com/defnull/bottle.git
+    $ cd bottle/plugins/werkzeug
+    $ python setup.py install
+
+
+
+使用
+===============
+
+一旦安装到应用中，该插件将支持 :class:`werkzeug.wrappers.Response` ，所有类型的 :mod:`werkzeug.exceptions` 
+和thread-local的 :class:`werkzeug.wrappers.Request` 的实例(每次请求都更新)。插件它本身还扮演着werkzeug模块的
+角色，所以你无需在应用中导入werkzeug。下面是一个例子。
+
+::
+
+    import bottle
+
+    app = bottle.Bottle()
+    werkzeug = bottle.ext.werkzeug.Plugin()
+    app.install(werkzeug)
+
+    req = werkzueg.request # For the lazy.
+
+    @app.route('/hello/:name')
+    def say_hello(name):
+        greet = {'en':'Hello', 'de':'Hallo', 'fr':'Bonjour'}
+        language = req.accept_languages.best_match(greet.keys())
+        if language:
+            return werkzeug.Response('%s %s!' % (greet[language], name))
+        else:
+            raise werkzeug.exceptions.NotAcceptable()
+
+
+使用调试器
+====================
+
+该插件用一个更高级的调试器替换了默认的错误页面。如果你启用了 `evalex` 特性，你可在浏览器中使用一个
+交互式的终端来检查错误。在你启用该特性之前，请看 `通过werkzeug来调试 <werkzeug:debug>`_ 。
+
+
+配置
+=============
+
+有下列可配置的选项:
+
+* **evalex**: 启用交互式的调试器。要求一个单进程的服务器，且有安全隐患。请看 `通过werkzeug来调试 <werkzeug:debug>`_ (默认： False)
+* **request_class**: 默认是 :class:`werkzeug.wrappers.Request` 的实例
+* **debugger_class**: 默认是 :class:`werkzeug.debug.DebuggedApplication` 的子类，遵守 :data:`bottle.DEBUG` 中的设置
+

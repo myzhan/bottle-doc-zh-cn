@@ -1,0 +1,91 @@
+=====================
+Bottle-SQLite
+=====================
+
+SQLite是一个"自包含"的SQL数据库引擎，不需要任何其它服务器软件或安装过程。sqlite3模块是Python标准库
+的一部分，在大部分系统上面已经安装了。在开发依赖数据库的应用原型的时候，它是非常有用的，可在部署的时候再
+使用PostgreSQL或MySQL。
+
+这个插件让在Bottle应用中使用sqlite数据库更简单了。一旦安装了，你只要在route的回调函数里添加一个"db"
+参数(可更改为其它字符)，就能使用数据库链接了。
+
+安装
+===============
+
+下面两个命令任选一个
+
+::
+
+    $ pip install bottle-sqlite
+    $ easy_install bottle-sqlite
+
+或从github下载最新版本
+
+::
+
+    $ git clone git://github.com/defnull/bottle.git
+    $ cd bottle/plugins/sqlite
+    $ python setup.py install
+
+使用
+===============
+
+一旦安装到应用里面，如果route的回调函数包含一个名为"db"的参数，该插件会
+给该参数传一个 :class:`sqlite3.Connection` 类的实例。
+
+::
+
+    import bottle
+
+    app = bottle.Bottle()
+    plugin = bottle.ext.sqlite.Plugin(dbfile='/tmp/test.db')
+    app.install(plugin)
+
+    @app.route('/show/:item')
+    def show(item, **db** ):
+        row = db.execute('SELECT * from items where name=?', item).fetchone()
+        if row:
+            return template('showitem', page=row)
+        return HTTPError(404, "Page not found")
+
+不包含"db"参数的route不会受影响。
+
+可通过下标(像元组)来访问 :class:`sqlite3.Row` 对象，且对命名的大小写敏感。在请求结束后，自动提交
+事务和关闭连接。如果出现任何错误，自上次提交后的所有更改都会被回滚，以保证数据库的一致性。
+
+
+配置
+=============
+
+The following configuration options exist for the plugin class:
+
+* **dbfile**: 数据库文件 (默认： 存在在内存中)。
+* **keyword**: route中使用数据库连接的参数 (默认： 'db')。
+* **autocommit**: 是否在请求结束后提交事务 (默认： True)。
+* **dictrows**: 是否可像字典那样访问row对象 (默认： True)。
+
+你可在route里面覆盖这些默认值。
+
+::
+
+    @app.route('/cache/:item', sqlite={'dbfile': ':memory:'})
+    def cache(item, db):
+        ...
+   
+或在同一个应用里面安装 ``keyword`` 参数不同的两个插件。
+
+::
+
+    app = bottle.Bottle()
+    test_db = bottle.ext.sqlite.Plugin(dbfile='/tmp/test.db')
+    cache_db = bottle.ext.sqlite.Plugin(dbfile=':memory:', keyword='cache')
+    app.install(test_db)
+    app.install(cache_db)
+
+    @app.route('/show/:item')
+    def show(item, db):
+        ...
+
+    @app.route('/cache/:item')
+    def cache(item, cache):
+        ...
