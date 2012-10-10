@@ -10,7 +10,7 @@ fork自bottle项目，由于历史原因，现在新建一个文档翻译项目�
 在docs目录执行
 make latex
 
-然后去../build下面执行
+然后去../build/docs/latex/下面执行
 xelatex Bottle.tex
 
 sphinx默认的latex命令不支持中文，暂时我只有这个办法。
