@@ -1,7 +1,7 @@
 Bottle中文文档 0.11dev
 ===================================
 
-**注意：为了更方便地保持和官方文档的同步，我新建了一个项目，在 https://github.com/myzhan/bottle 下。这个fork不再维护。**
+**注意：为了更方便地保持和官方文档的同步，我新建了一个项目，在https://github.com/myzhan/bottle**
 
 **新的项目中，中文文档的po文件在docs/_locale/zh_CN目录下，可利用sphinx的i18n机制生成中文文档。**
 
